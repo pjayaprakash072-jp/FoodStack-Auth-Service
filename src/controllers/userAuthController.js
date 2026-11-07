@@ -1,7 +1,9 @@
 const User = require('../models/UserAuth')
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto')
-const { sendWelcomeEmail , sendVerificationEmail} = require('../utils/email');
+const { 
+    sendWelcomeEmail, 
+    sendVerificationEmail} = require('../utils/email');
 const {setCache} = require('../utils/cache')
 const jwt = require("jsonwebtoken")
 const sendWhatsAppMessage = require('../utils/whatsapp')
@@ -24,7 +26,7 @@ const createUserAuth = async(req,res)=>{
         if(existingUser){
             return res.status(400).json(
                 {
-                    message:"User with this email already Existe."
+                    message:"User with this email already Exists."
                 }
             )
         }
@@ -55,12 +57,15 @@ const createUserAuth = async(req,res)=>{
         }
         //Send Whatsapp message
         try {
-            if(phone){
-                await sendWhatsAppMessage(phone,name);
-                console.log("Whatsapp welcome message sent!")
-            }
+            // if(phone){
+            //     await sendWhatsAppMessage(phone,name);
+            //     console.log("Whatsapp welcome message sent!")
+            // }
+            await sendWelcomeEmail(email,name);
         } catch (error) {
-            console.log("WhatsApp message failed",error.message)
+            // console.log("WhatsApp message failed",error.message)
+            console.log("Failed to sent welcome messsage",error.message)
+
         }
     res.status(201).json(
         {
