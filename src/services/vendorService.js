@@ -28,6 +28,26 @@ const createVendor = async(payload,authId)=>{
         throw error;
     }
 }
+const getVendor = async(email)=>{
+    try {
+        const response = await vendorService.get(
+            '/vendor/get',
+            {
+                params:{
+                    email
+                }
+            }
+        )
+        return unwrap(response);
+    } catch (error) {
+        if(error.response?.status === 400 || error.response?.status === 4004){
+            console.log(error.response?.data?.message);
+            return null;
+        }
+        throw error;
+    }
+}
 module.exports = {
-    createVendor
+    createVendor,
+    getVendor
 }
