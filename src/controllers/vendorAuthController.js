@@ -8,7 +8,8 @@ const {
     sendWelcomeEmail,
     sendForgotPasswordLink
 } = require('../utils/email')
-const {OAuth2Client } = require('google-auth-library')
+const {OAuth2Client } = require('google-auth-library');
+const {createVendor} = require('../services/vendorService')
 const googleClient = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID
 )
@@ -19,6 +20,8 @@ const createVendorAuth = async (req, res) => {
             email,
             password,
             phone,
+            businessName,
+            status
         } = req.body;
         const existingVendor = await Vendor.findOne({ email });
         if (existingVendor) {
@@ -32,7 +35,14 @@ const createVendorAuth = async (req, res) => {
             password: hashedPassword,
             authProvider: "local"
         });
-
+        const payload = {
+            name,
+            email,
+            phone,
+            businessName,
+            status
+        }
+        await createVendor(payload, vendor._id);
         await vendor.save();
         try {
             await sendWelcomeEmail(email,name);
