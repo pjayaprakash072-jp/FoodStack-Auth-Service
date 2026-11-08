@@ -243,7 +243,7 @@ const loginVendor = async (req, res) => {
     }
 };
 const updateVendorAuth =  async(req,res)=>{
-    console.log(req.body)
+    console.log("update vendor",req.body)
     try {
         const authId = req.authId;
         const vendor = await Vendor.findById(authId);
@@ -389,7 +389,7 @@ const resetPassword = async (req,res)=>{
 const deleteVendorAuth = async (req,res)=>{
     try {
         const authId = req.authId;
-        const vendor = await Vendor.findById(authId);
+        const vendor = await Vendor.findByIdAndDelete(authId);
         if(!vendor){
             return res.status(400).json(
                 {
@@ -397,7 +397,6 @@ const deleteVendorAuth = async (req,res)=>{
                 }
             )
         }
-        await Vendor.findByIdAndDelete(authId);
         res.status(200).json(
             {
                 message:"vendorAuth deleted Successfully"
