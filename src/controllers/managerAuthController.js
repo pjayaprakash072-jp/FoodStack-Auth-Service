@@ -2,6 +2,7 @@ const Manager = require('../models/ManagerAuth');
 const { setCache } = require('../utils/cache');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const {getManager} = require('../services/managerService')
 const createManagerAuth = async(req,res)=>{
     try {
         const {
@@ -89,11 +90,12 @@ const loginManager = async(req,res)=>{
                 expiresIn:"1d"
             }
         )
+        const fetchManager = await getManager(token);
         res.status(200).json(
             {
                 message:"Manager Logged in successfully!",
                 token,
-                managerAuth:manager
+                manager:fetchManager.manager
             }
         )
     } catch (error) {
@@ -106,7 +108,7 @@ const loginManager = async(req,res)=>{
         )
     }
 }
-const getManager = async(req,res)=>{
+const getManagerAuth = async(req,res)=>{
     try {
         const {phone} = req.query;
         const manager = await Manager.findOne({phone});
@@ -137,5 +139,5 @@ const getManager = async(req,res)=>{
 module.exports = {
     createManagerAuth,
     loginManager,
-    getManager
+    getManagerAuth
 }
