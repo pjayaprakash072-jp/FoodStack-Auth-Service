@@ -17,7 +17,7 @@ const getManager = async(token)=>{
         )
         return response.data;
     } catch (error) {
-        if(error.response?.status === 400 || error.response?.status === 4001){
+        if(error.response?.status === 400 || error.response?.status === 404){
             console.log(error.response?.data?.message);
             return null;
         }

@@ -21,7 +21,7 @@ const createVendor = async(payload,authId)=>{
         )
         return unwrap(response);
     } catch (error) {
-        if(error.response?.status === 400 || error.response?.status === 4004){
+        if(error.response?.status === 400 || error.response?.status === 404){
             console.log(error.response?.data?.message);
             return null;
         }
@@ -40,7 +40,7 @@ const getVendor = async(email)=>{
         )
         return unwrap(response);
     } catch (error) {
-        if(error.response?.status === 400 || error.response?.status === 4004){
+        if(error.response?.status === 400 || error.response?.status === 404){
             console.log(error.response?.data?.message);
             return null;
         }

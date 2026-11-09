@@ -7,6 +7,10 @@ const {
 const {setCache} = require('../utils/cache')
 const jwt = require("jsonwebtoken")
 const sendWhatsAppMessage = require('../utils/whatsapp')
+const {
+    createUser,
+    getUser
+} = require('../services/userService')
 const createUserAuth = async(req,res)=>{
     try{
         const {
@@ -46,10 +50,9 @@ const createUserAuth = async(req,res)=>{
                 emailVerificationExpires:verificationTokenExpires
             }
         )
+        const response = await createUser({name,email,phone});
         await user.save();
         const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
-        console.log("token",verificationToken);
-        console.log("url",verificationURL);
         try{
             await sendVerificationEmail(email,name,verificationURL);
         }catch(err){
@@ -70,7 +73,7 @@ const createUserAuth = async(req,res)=>{
     res.status(201).json(
         {
             message:"user Created Successfull! Please Verify email",
-            userAuth:user
+            user:response.user
         }
     )
     }catch(err){
@@ -139,11 +142,12 @@ const loginUser = async(req,res)=>{
                 expiresIn:'1h'
             }
         )
+        const fetchUser = await getUser(token);
         res.status(200).json(
             {
                 message:"User logged in successfully!",
                 token,
-                userAuth:user
+                user:fetchUser.user
             }
         )
     } catch (error) {
@@ -200,8 +204,43 @@ const verifyUserEmail = async(req,res)=>{
         )
     }
 }
+const updateUserAuth = async(req,res)=>{
+    try {
+        const id = req.authId;
+        const userAuth = await User.findById(id);
+        if(!userAuth){
+            return res.status(400).json(
+                {
+                    message:"UserAuth not found!"
+                }
+            )
+        }
+        const {password, ...otherFields} = req.body;
+        Object.assign(userAuth,otherFields);
+        if(password){
+            const hashedPassword = await bcrypt.hash(password,10);
+            userAuth.password = hashedPassword;
+        }
+        await userAuth.save();
+        res.status(200).json(
+            {
+                message:"usrAuth updated successfully!",
+                userAuth
+            }
+        )
+    } catch (error) {
+        console.log("Failed to update UserAuth",error);
+        res.status(500).json(
+            {
+                message:"Internal server error, Failed to update Userauth",
+                error:error.message
+            }
+        )
+    }
+}
 module.exports = {
     createUserAuth,
     loginUser,
-    verifyUserEmail
+    verifyUserEmail,
+    updateUserAuth
 }
