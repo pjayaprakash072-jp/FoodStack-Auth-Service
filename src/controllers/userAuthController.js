@@ -50,7 +50,7 @@ const createUserAuth = async(req,res)=>{
                 emailVerificationExpires:verificationTokenExpires
             }
         )
-        const response = await createUser({name,email,phone});
+        const response = await createUser({name,email,phone},user._id);
         await user.save();
         const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
         try{
@@ -143,6 +143,13 @@ const loginUser = async(req,res)=>{
             }
         )
         const fetchUser = await getUser(token);
+        if(!fetchUser || !fetchUser.user){
+            return res.status(400).json(
+                {
+                    message:" User profile not found!"
+                }
+            )
+        }
         res.status(200).json(
             {
                 message:"User logged in successfully!",

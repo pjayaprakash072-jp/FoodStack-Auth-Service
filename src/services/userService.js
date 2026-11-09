@@ -27,7 +27,7 @@ const createUser = async(payload,authId)=>{
 }
 const getUser = async(token)=>{
     try {
-        const response = await userApi.post(
+        const response = await userApi.get(
             '/user/get',
             {
                 headers:{
