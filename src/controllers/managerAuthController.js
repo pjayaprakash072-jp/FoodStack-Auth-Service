@@ -136,8 +136,35 @@ const getManagerAuth = async(req,res)=>{
     }
 }
 
+const deltetManagerAuth = async(req,res)=>{
+    try {
+        const id = req.authId;
+        const managerAuth = await Manager.findByIdAndDelete(id);
+        if(!managerAuth){
+            return res.status(400).json(
+                {
+                    message:"Failed to delete the managerAuth!"
+                }
+            )
+        }
+        res.status(200).json(
+            {
+                message:"managerAuth deleted successfully!"
+            }
+        )
+    } catch (error) {
+        console.log("Failed to delete the manager Auth", error);
+        res.status(500).json(
+            {
+                message:"Internal server error, Failed to deltet the managerAuth",
+                error:error.message
+            }
+        )
+    }
+}
 module.exports = {
     createManagerAuth,
     loginManager,
-    getManagerAuth
+    getManagerAuth,
+    deltetManagerAuth
 }
