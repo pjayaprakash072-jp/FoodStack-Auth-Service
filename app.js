@@ -17,6 +17,9 @@ app.get('/',(req,res)=>{
     return res.send("Authentication service is working...")
 })
 
+app.use("/vendorAuth/work",(req,res)=>{
+    return res.send("working");
+});
 app.use("/vendorAuth",vendorRoutes);
 app.use("/userAuth",userRoutes)
 app.use("/managerAuth",managerRoutes)

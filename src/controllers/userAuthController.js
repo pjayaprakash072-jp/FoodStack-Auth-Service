@@ -1,9 +1,10 @@
 const User = require('../models/UserAuth')
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto')
-const { 
-    sendWelcomeEmail, 
-    sendVerificationEmail} = require('../utils/email');
+// const { 
+//     sendWelcomeEmail, 
+//     sendVerificationEmail} = require('../utils/email');
+const sendEmailJob = require('../services/emailProducer')
 const {setCache} = require('../utils/cache')
 const jwt = require("jsonwebtoken")
 const sendWhatsAppMessage = require('../utils/whatsapp')
@@ -53,23 +54,34 @@ const createUserAuth = async(req,res)=>{
         const response = await createUser({name,email,phone},user._id);
         await user.save();
         const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
-        try{
-            await sendVerificationEmail(email,name,verificationURL);
-        }catch(err){
-            console.log("Email send failed",err)
-        }
-        //Send Whatsapp message
-        try {
-            // if(phone){
-            //     await sendWhatsAppMessage(phone,name);
-            //     console.log("Whatsapp welcome message sent!")
-            // }
-            await sendWelcomeEmail(email,name);
-        } catch (error) {
-            // console.log("WhatsApp message failed",error.message)
-            console.log("Failed to sent welcome messsage",error.message)
+        await sendEmailJob(
+            {
+                type:"VERIFY_EMAIL",
+                data:{
+                    name,
+                    email,
+                    verificationURL
+                }
+            }
+        )
+        // //Send Eamil
+        // try{
+        //     await sendVerificationEmail(email,name,verificationURL);
+        // }catch(err){
+        //     console.log("Email send failed",err)
+        // }
+        // //Send Whatsapp message
+        // try {
+        //     if(phone){
+        //         await sendWhatsAppMessage(phone,name);
+        //         console.log("Whatsapp welcome message sent!")
+        //     }
+        //     await sendWelcomeEmail(email,name);
+        // } catch (error) {
+        //     console.log("WhatsApp message failed",error.message)
+        //     console.log("Failed to sent welcome messsage",error.message)
 
-        }
+        // }
     res.status(201).json(
         {
             message:"user Created Successfull! Please Verify email",
@@ -107,11 +119,21 @@ const loginUser = async(req,res)=>{
             user.emailVerificationExpires = verificationTokenExpires;
             user.save();
             const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
-            try{
-                await sendVerificationEmail(email,user.name,verificationURL)
-            }catch(err){
-                console.log("Email sent Failed")
-            }
+            await sendEmailJob(
+                {
+                    type:"VERIFY_EMAIL",
+                    data:{
+                        name:user.name,
+                        email,
+                        verificationURL
+                    }
+                }
+            )
+            // try{
+            //     await sendVerificationEmail(email,user.name,verificationURL)
+            // }catch(err){
+            //     console.log("Email sent Failed")
+            // }
             return res.status(400).json(
                 {
                     message:"Verification link is sent ot your email,Please verify your email before logging in."
