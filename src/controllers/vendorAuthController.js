@@ -5,10 +5,10 @@ const crypto = require('crypto')
 const {setCache} = require("../utils/cache")
 const Vendor = require("../models/VendorAuth")
 const sendEmailJob = require('../services/emailProducer')
-// const {
-//     sendWelcomeEmail,
-//     sendForgotPasswordLink
-// } = require('../utils/email')
+const {
+    sendWelcomeEmail,
+    sendForgotPasswordLink
+} = require('../utils/email')
 const {OAuth2Client } = require('google-auth-library');
 const {
     createVendor,
@@ -17,6 +17,9 @@ const {
 const googleClient = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID
 )
+
+const useQueues = false;
+
 const createVendorAuth = async (req, res) => {
     try {
         const{
@@ -46,20 +49,23 @@ const createVendorAuth = async (req, res) => {
         }
         const response = await createVendor(payload, vendor._id);
         await vendor.save();
-        // try {
-        //     await sendWelcomeEmail(email,name);
-        // } catch (error) {
-        //     console.error("Email send failed" , error)
-        // }
-        await sendEmailJob(
-            {
-                type:"WELCOME_EMAIL",
-                data:{
-                    email,
-                    name
+        if(useQueues){
+            await sendEmailJob(
+                {
+                    type:"WELCOME_EMAIL",
+                    data:{
+                        email,
+                        name
+                    }
                 }
+            )
+        }else{
+            try {
+                await sendWelcomeEmail(email,name);
+            } catch (error) {
+                console.error("Email send failed" , error)
             }
-        )
+        }
 
         res.status(201).json(
             { 
@@ -151,20 +157,18 @@ const googleLogin = async(req,res)=>{
             }
             await createVendor(payload, vendor._id);
             await vendor.save();
-            await sendEmailJob(
-                {
-                    type:"WELCOME_EMAIL",
-                    data:{
-                        email,
-                        name
+            await (useQueues
+                ?sendEmailJob(
+                    {
+                        type:"WELCOME_EMAIL",
+                        data:{
+                            email,
+                            name
+                        }
                     }
-                }
-            )
-            // try{
-            //     await sendWelcomeEmail(email,name);
-            // }catch(err){
-            //     console.log("Failed to send Welcome email" , err);
-            // }
+                )
+                : sendWelcomeEmail(email,name)
+            ).catch((error)=> console.error("Email send failed",error))
         }else{
             if(!vendor.googleId){
                 vendor.googleId = googleId;
@@ -324,17 +328,20 @@ const forgotPassword = async(req,res)=>{
         await vendor.save({validateBeforeSave:false})
 
         const resetURL =`${process.env.FRONTEND_URL_VENDOR}/reset-password/${resetToken}`
-        await sendEmailJob(
-            {
-                type:"FORGOT_PASSWORD",
-                data:{
-                    email:vendor.email,
-                    name:vendor.name,
-                    resetURL
+        if(useQueues){
+            await sendEmailJob(
+                {
+                    type:"FORGOT_PASSWORD",
+                    data:{
+                        email:vendor.email,
+                        name:vendor.name,
+                        resetURL
+                    }
                 }
-            }
-        )
-        // await sendForgotPasswordLink(vendor.email,vendor.name,resetURL);
+            )
+        }else{
+            await sendForgotPasswordLink(vendor.email,vendor.name,resetURL);
+        }
         return res.status(200).json(
             {
                 message:"Password reset link is sent!"
