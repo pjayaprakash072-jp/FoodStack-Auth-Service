@@ -1,6 +1,10 @@
 const kafka = require('../../config/kafka');
 
-const consumer = kafka.consumer();
+const consumer = kafka.consumer(
+  {
+    groupId:process.env.KAFKA_GROUP_ID
+  }
+);
 
 const connectConsumer = async(topics)=>{
   try {

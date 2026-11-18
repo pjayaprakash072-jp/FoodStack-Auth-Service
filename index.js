@@ -3,14 +3,21 @@ dotEnv.config();
 const app = require('./app')
 const connectDB = require('./src/config/db');
 const {connectRedis} = require('./src/config/redis');
-const {connectProducer} = require('./src/config/kafka');
+
+
+const {connectProducer} = require('./src/utils/kafka/producer')
+const {connectConsumer} = require('./src/utils/kafka/consumer')
+const KAFKA_TOPICS = require('./src/utils/kafka/topics');
+
 
 const PORT = process.env.PORT || 5000
-connectProducer();
 const startServer =async ()=>{
     try {
         await connectDB();
         await connectRedis();
+
+        await connectProducer();
+        await connectConsumer(Object.values(KAFKA_TOPICS))
         app.listen(PORT,()=>{
             console.log(`Server is running at port ${PORT}`)
         })
