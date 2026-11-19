@@ -6,7 +6,8 @@ const {connectRedis} = require('./src/config/redis');
 
 
 const {connectProducer} = require('./src/utils/kafka/producer')
-const {connectConsumer} = require('./src/utils/kafka/consumer')
+const {connectConsumer} = require('./src/utils/kafka/consumer');
+const {createTopics} = require('./src/utils/kafka/createTopics')
 const KAFKA_TOPICS = require('./src/utils/kafka/topics');
 
 
@@ -16,6 +17,7 @@ const startServer =async ()=>{
         await connectDB();
         await connectRedis();
 
+        await createTopics();
         await connectProducer();
         await connectConsumer(Object.values(KAFKA_TOPICS))
         app.listen(PORT,()=>{
