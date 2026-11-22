@@ -1,6 +1,12 @@
 const KAFKA_TOPICS = {
-  VENDOR_CREATED:"vendor.created",
-  USER_CREATED:"user.created",
-  MANAGER_CREATED:"manager.created"
+  USER_REG_REQ:"user.registration.requested",
+  EMAIL_REQUESTS:"email.requests"
 }
-module.exports = KAFKA_TOPICS;
+const CONSUMER_TOPICS = {
+  USER_PROFILE_CREATED:"user.profile.created",
+  USER_PROFILE_FAILED:"user.profile.failed",
+}
+module.exports = {
+  KAFKA_TOPICS,
+  CONSUMER_TOPICS
+};

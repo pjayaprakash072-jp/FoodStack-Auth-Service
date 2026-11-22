@@ -1,5 +1,5 @@
 const kafka = require('../../config/kafka');
-const KAFKA_TOPICS = require('./topics');
+const {KAFKA_TOPICS} = require('./topics');
 
 const createTopics = async()=>{
   const admin = kafka.admin();

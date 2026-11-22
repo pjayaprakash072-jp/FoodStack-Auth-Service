@@ -12,13 +12,14 @@ const connectProducer = async()=>{
   }
 }
 
-const pbulishMessage = async(topic,msg)=>{
+const pbulishMessage = async(topic,msg,key=null)=>{
   try {
     await producer.send(
       {
         topic,
         messages:[
           {
+            key,
             value: JSON.stringify(msg),
           }
         ]

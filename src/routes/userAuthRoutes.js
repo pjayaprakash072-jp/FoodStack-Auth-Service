@@ -7,7 +7,7 @@ const {
 } = require('../controllers/userAuthController');
 const verifyCaptcha = require("../middleware/verifyCaptcha");
 const verifyTokenAuth = require('../middleware/verifyTokenAuth');
-router.post("/create",verifyCaptcha,createUserAuth);
+router.post("/create",createUserAuth);
 router.post("/login", loginUser);
 router.get("/verify-email/:verificationToken", verifyUserEmail)
 router.post('/update',verifyTokenAuth,updateUserAuth)

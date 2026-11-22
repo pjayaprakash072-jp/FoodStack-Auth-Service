@@ -8,7 +8,7 @@ const {connectRedis} = require('./src/config/redis');
 const {connectProducer} = require('./src/utils/kafka/producer')
 const {connectConsumer} = require('./src/utils/kafka/consumer');
 const {createTopics} = require('./src/utils/kafka/createTopics')
-const KAFKA_TOPICS = require('./src/utils/kafka/topics');
+const {CONSUMER_TOPICS} = require('./src/utils/kafka/topics');
 
 
 const PORT = process.env.PORT || 5000
@@ -19,7 +19,7 @@ const startServer =async ()=>{
 
         await createTopics();
         await connectProducer();
-        await connectConsumer(Object.values(KAFKA_TOPICS))
+        await connectConsumer(Object.values(CONSUMER_TOPICS))
         app.listen(PORT,()=>{
             console.log(`Server is running at port ${PORT}`)
         })

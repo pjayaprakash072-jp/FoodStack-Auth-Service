@@ -4,6 +4,8 @@ const crypto = require('crypto')
 const { 
     sendWelcomeEmail, 
     sendVerificationEmail} = require('../utils/email');
+const {pbulishMessage} = require('../utils/kafka/producer')
+const {KAFKA_TOPICS} = require('../utils/kafka/topics')
 const sendEmailJob = require('../services/emailProducer')
 const {setCache} = require('../utils/cache')
 const jwt = require("jsonwebtoken")
@@ -53,44 +55,35 @@ const createUserAuth = async(req,res)=>{
                 emailVerificationExpires:verificationTokenExpires
             }
         )
-        const response = await createUser({name,email,phone},user._id);
-        await user.save();
-        const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
-        if(useQueues){
-            await sendEmailJob(
-                {
-                    type:"VERIFY_EMAIL",
-                    data:{
-                        name,
-                        email,
-                        verificationURL
-                    }
+        // const response = await createUser({name,email,phone},user._id);
+        await pbulishMessage(
+            KAFKA_TOPICS.USER_REG_REQ,{
+                event:"Reginster new user",
+                data:{
+                    name,
+                    email,
+                    phone,
+                    authId:user._id
                 }
-            )
-        }else{
-            //Send Eamil
-            try{
-                await sendVerificationEmail(email,name,verificationURL);
-            }catch(err){
-                console.log("Email send failed",err)
             }
-        }
-        // //Send Whatsapp message
-        // try {
-        //     if(phone){
-        //         await sendWhatsAppMessage(phone,name);
-        //         console.log("Whatsapp welcome message sent!")
-        //     }
-        //     await sendWelcomeEmail(email,name);
-        // } catch (error) {
-        //     console.log("WhatsApp message failed",error.message)
-        //     console.log("Failed to sent welcome messsage",error.message)
-
-        // }
+        )
+        // await user.save();
+        const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
+        await pbulishMessage(
+            KAFKA_TOPICS.EMAIL_REQUESTS,
+            {
+                event:"VERIFY_EMAIL",
+                data:{
+                    email,
+                    name,
+                    verificationURL
+                }
+            }
+        )
     res.status(201).json(
         {
             message:"user Created Successfull! Please Verify email",
-            user:response.user
+            // user:response.user
         }
     )
     }catch(err){
