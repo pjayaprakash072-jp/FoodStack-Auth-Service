@@ -4,7 +4,7 @@ const crypto = require('crypto')
 const { 
     sendWelcomeEmail, 
     sendVerificationEmail} = require('../utils/email');
-const {pbulishMessage} = require('../utils/kafka/producer')
+const {publishMessage} = require('../utils/kafka/producer')
 const {KAFKA_TOPICS} = require('../utils/kafka/topics')
 const sendEmailJob = require('../services/emailProducer')
 const {setCache} = require('../utils/cache')
@@ -52,13 +52,17 @@ const createUserAuth = async(req,res)=>{
                 phone,
                 authProvider:"local",
                 emailVerificationToken:verificationToken,
-                emailVerificationExpires:verificationTokenExpires
+                emailVerificationExpires:verificationTokenExpires,
+                registrationStatus:"PENDING"
             }
         )
         // const response = await createUser({name,email,phone},user._id);
-        await pbulishMessage(
+        await publishMessage(
             KAFKA_TOPICS.USER_REG_REQ,{
-                event:"Reginster new user",
+                eventId:crypto.randomUUID(),
+                eventType:"USER_REGINSTRATION_REQUESTED",
+                authId:user._id.toString(),
+                occuredAt: new Date().toISOString(),
                 data:{
                     name,
                     email,
@@ -69,10 +73,11 @@ const createUserAuth = async(req,res)=>{
         )
         // await user.save();
         const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
-        await pbulishMessage(
+        await publishMessage(
             KAFKA_TOPICS.EMAIL_REQUESTS,
             {
-                event:"VERIFY_EMAIL",
+                eventId:crypto.randomUUID(),
+                eventType:"VERIFY_EMAIL",
                 data:{
                     email,
                     name,
@@ -80,10 +85,11 @@ const createUserAuth = async(req,res)=>{
                 }
             }
         )
-    res.status(201).json(
+    res.status(202).json(
         {
             message:"user Created Successfull! Please Verify email",
-            // user:response.user
+            registrationStatus:user.registrationStatus,
+            authId:user._id
         }
     )
     }catch(err){

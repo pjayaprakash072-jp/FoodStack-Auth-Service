@@ -16,6 +16,11 @@ const outletManagerSchema = new mongoose.Schema(
         role:{
             type:String,
             default:"manager"
+        },
+        registrationStatus:{
+            type:String,
+            enum:["PENDING","ACTIVE","FAILED"],
+            default:"PENDING"
         }
     }
 )

@@ -12,15 +12,20 @@ const connectProducer = async()=>{
   }
 }
 
-const pbulishMessage = async(topic,msg,key=null)=>{
+const publishMessage = async(topic,msg)=>{
   try {
+    const { eventType, eventId, ...message}= msg;
     await producer.send(
       {
         topic,
         messages:[
           {
-            key,
-            value: JSON.stringify(msg),
+            key:eventId?eventId : undefined,
+            value: JSON.stringify(message),
+            headers:{
+              eventType,
+              version:"1"
+            }
           }
         ]
       }
@@ -38,6 +43,6 @@ const disconnectproducer = async()=>{
 
 module.exports = {
   connectProducer,
-  pbulishMessage,
+  publishMessage,
   disconnectproducer
 }
