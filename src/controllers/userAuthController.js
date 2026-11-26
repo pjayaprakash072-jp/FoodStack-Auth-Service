@@ -57,6 +57,7 @@ const createUserAuth = async(req,res)=>{
             }
         )
         // const response = await createUser({name,email,phone},user._id);
+        await user.save();
         await publishMessage(
             KAFKA_TOPICS.USER_REG_REQ,{
                 eventId:crypto.randomUUID(),
@@ -70,7 +71,6 @@ const createUserAuth = async(req,res)=>{
                 }
             }
         )
-        // await user.save();
         const verificationURL = `${process.env.FRONTEND_URL_CLIENT}/verify-email/${verificationToken}`
         await publishMessage(
             KAFKA_TOPICS.EMAIL_REQUESTS,

@@ -8,14 +8,14 @@ const userProfileCreated = async(event)=>{
     } = event;
     const user = await User.findById(authId);
     if(!user){
-      throw new Error("Auth user not found :",authid)
+      throw new Error("Auth user not found :",authId)
     }
     if(user.registrationStatus === "ACTIVE"){
       return ;
     }
 
     user.registrationStatus = "ACTIVE";
-    user.save();
+    await user.save();
     console.log("User Registration is completed for :", authId);
   } catch (error) {
     console.log("User profile creation failed in AuthService:",error);

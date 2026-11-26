@@ -1,5 +1,8 @@
 const kafka = require('../../config/kafka');
-
+const {
+  userProfileCreated,
+  userProfileFailed
+} = require('./handlers/userServiceHandler')
 const consumer = kafka.consumer(
   {
     groupId:process.env.KAFKA_GROUP_ID
@@ -31,6 +34,16 @@ const connectConsumer = async(topics)=>{
             partition,
             data
           })
+          switch(eventType){
+            case "USER_PROFILE_CREATED":
+              await userProfileCreated(data).then(()=>console.log("profile created handled")).catch((err)=>console.log("handled Failed",err))
+              break;
+            case "USER_PROFILE_FAILED":
+              await userProfileFailed(data);
+              break;
+            default:
+              throw new Error("Unknown eventType:",eventType);
+          }
         }
       }
     )
