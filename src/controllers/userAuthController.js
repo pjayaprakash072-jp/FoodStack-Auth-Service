@@ -67,7 +67,6 @@ const createUserAuth = async(req,res)=>{
                     name,
                     email,
                     phone,
-                    authId:user._id
                 }
             }
         )

@@ -52,7 +52,13 @@ const userSchema = new mongoose.Schema(
         emailVerificationExpires:{
             type:Date,
             default:null
-        }
+        },
+        registrationStatus:{
+            type:String,
+            enum:["PENDING","ACTIVE","FAILED"],
+            default:"PENDING"
+        },
+        registrationError:String
     },
     {
         timestamps:true

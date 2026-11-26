@@ -23,8 +23,10 @@ const connectConsumer = async(topics)=>{
     await consumer.run(
       {
         eachMessage: async ({topic,partition,message})=>{
+          const eventType = message.headers?.eventType?.toString();
           const data = JSON.parse(message.value.toString());
           console.log("Received Kafka message:",{
+            eventType,
             topic,
             partition,
             data
