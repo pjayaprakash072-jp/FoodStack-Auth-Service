@@ -1,0 +1,59 @@
+const mongoose = require('mongoose');
+const outboxSchema = new mongoose.Schema(
+  {
+    eventId:{
+      type:String,
+      required:true,
+      unique:true
+    },
+    eventType:{
+      type:String,
+      required:true
+    },
+    topic:{
+      type:String,
+      required:true
+    },
+    payload:{
+      type:mongoose.Schema.Types.Mixed,
+      required:true
+    },
+    status:{
+      type:String,
+      enum:["PENDING","PROCESSING","PUBLISHED"],
+      default:"PENDING"
+    },
+    attempts:{
+      type:Number,
+      default:0
+    },
+    nextAttempt:{
+      type:Date,
+      default:Date.now
+    },
+    lockedUntil:{
+      type:Date,
+      default:null
+    },
+    latestError:{
+      type:String,
+      default:null
+    },
+    publishedAt:{
+      type:String,
+      default:null
+    }
+  },
+  {
+    timestamps:true
+  }
+)
+
+outboxSchema.index(
+  {
+    status:1,
+    nextAttempt:1
+  }
+)
+
+module.exports = mongoose.model("Outbox",outboxSchema);
